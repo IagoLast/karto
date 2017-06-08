@@ -1,0 +1,23 @@
+{
+	"name": "karto",
+	"version": "1.0.0",
+	"description": "maps library",
+	"main": "src/index.js",
+	"scripts": {
+		"build": "node_modules/webpack/bin/webpack.js ",
+		"watch": "node_modules/webpack/bin/webpack.js --watch",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"serve": "node_modules/serve/bin/serve.js "
+	},
+	"author": "@iagolast",
+	"license": "ISC",
+	"dependencies": {
+		"eslint": "^3.19.0"
+	},
+	"devDependencies": {
+		"babel-core": "^6.24.1",
+		"babel-loader": "^7.0.0",
+		"serve": "^5.2.2",
+		"webpack": "^2.6.1"
+	}
+}
