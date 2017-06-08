@@ -170,7 +170,7 @@ class Layer {
   }
 
   setSQL(sql) {
-    this.layerConfig.options.sql = sql;
+    this.config.options.sql = sql;
     this.hide();
     return this._getTileUrl().then(this.create.bind(this)).then(this.show.bind(this));
   }
@@ -211,22 +211,23 @@ function initApp(config) {
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["getLayerUrl"] = getLayerUrl;
-const HEADERS = new Headers({
-  'Content-Type': 'application/json'
-});
-
+// Get the tile server url from a given layer configuration
 function getLayerUrl(layer) {
-  return fetch(layer.apiUrl, {
-    method: 'POST',
-    headers: HEADERS,
-    body: _buildBody(layer)
-  }).then(data => data.json()).then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/0/{z}/{x}/{y}.png`);
+	return fetch(layer.apiUrl, {
+		method: 'POST',
+		headers: HEADERS,
+		body: _buildBody(layer)
+	}).then(data => data.json()).then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/0/{z}/{x}/{y}.png`);
 }
 
+const HEADERS = new Headers({
+	'Content-Type': 'application/json'
+});
+
 function _buildBody(layer) {
-  return JSON.stringify({
-    layers: [layer]
-  });
+	return JSON.stringify({
+		layers: [layer]
+	});
 }
 
 /***/ }),
