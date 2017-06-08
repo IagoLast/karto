@@ -1,7 +1,10 @@
 import Layer from './classes/Layer.js';
 import * as configService from './services/config.service.js';
 import * as apiService from './services/api.service.js';
-import renderService from './services/render.service.js';
+
+// Choose a renderService between the standard (leaflet) or the google-maps-one.
+import renderService from './services/render.service.js'; // Render layers using leaflet.
+// import renderService from './services/render.service.google.js'; // Render layers using google maps
 
 // Layer objects will have renderService and apiService injected.
 // This should be done using a proper DI method, but it´s ok for the demo.

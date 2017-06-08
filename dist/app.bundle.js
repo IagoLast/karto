@@ -79,6 +79,9 @@
 
 
 
+// Choose a renderService between the standard (leaflet) or the google-maps-one.
+ // Render layers using leaflet.
+// import renderService from './services/render.service.google.js'; // Render layers using google maps
 
 // Layer objects will have renderService and apiService injected.
 // This should be done using a proper DI method, but it´s ok for the demo.
