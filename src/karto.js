@@ -39,7 +39,11 @@ export default class Karto {
    * The `layers` field is a `MapConfig.layers` object. https://carto.com/docs/carto-engine/maps-api/mapconfig
    */
   addLayers(layersInfo) {
-    return Promise.all(layersInfo.map(this.addLayer.bind(this)));
+    return Promise.all(layersInfo.map(this.addLayer.bind(this)))
+      .then(layers => {
+        this.layers = layers;
+        return layers;
+      });
   }
 
   // Show a list of layers
@@ -51,11 +55,6 @@ export default class Karto {
   addLayer(layerConfig, $index) {
     layerConfig.zIndex = $index;
     layerConfig.apiUrl = this.config.apiUrl;
-    return new Layer(layerConfig, INYECTED_DEPENDENCES)
-      .init()
-      .then(layer => {
-        this.layers.push(layer);
-        return layer;
-      });
+    return new Layer(layerConfig, INYECTED_DEPENDENCES).init();
   }
 }

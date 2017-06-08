@@ -115,7 +115,10 @@ class Karto {
    * The `layers` field is a `MapConfig.layers` object. https://carto.com/docs/carto-engine/maps-api/mapconfig
    */
   addLayers(layersInfo) {
-    return Promise.all(layersInfo.map(this.addLayer.bind(this)));
+    return Promise.all(layersInfo.map(this.addLayer.bind(this))).then(layers => {
+      this.layers = layers;
+      return layers;
+    });
   }
 
   // Show a list of layers
@@ -127,10 +130,7 @@ class Karto {
   addLayer(layerConfig, $index) {
     layerConfig.zIndex = $index;
     layerConfig.apiUrl = this.config.apiUrl;
-    return new __WEBPACK_IMPORTED_MODULE_0__classes_Layer_js__["a" /* default */](layerConfig, INYECTED_DEPENDENCES).init().then(layer => {
-      this.layers.push(layer);
-      return layer;
-    });
+    return new __WEBPACK_IMPORTED_MODULE_0__classes_Layer_js__["a" /* default */](layerConfig, INYECTED_DEPENDENCES).init();
   }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = Karto;
@@ -142,6 +142,10 @@ class Karto {
 
 "use strict";
 class Layer {
+  /**
+   * The constructor gets the renderService and the apiService injected by the Karto object
+   * This way is easier to mock, test and change implementations.
+   */
   constructor(layerConfig, { renderService, apiService }) {
     this.config = layerConfig;
     this.renderService = renderService;
