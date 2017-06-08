@@ -1,4 +1,8 @@
 export default class Layer {
+  /**
+   * The constructor gets the renderService and the apiService injected by the Karto object
+   * This way is easier to mock, test and change implementations.
+   */
   constructor(layerConfig, {renderService, apiService}) {
     this.config = layerConfig;
     this.renderService = renderService;

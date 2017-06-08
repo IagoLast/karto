@@ -17,6 +17,9 @@ You must have yarn or npm installed in your local machine.
 
     yarn serve
 
+## Architecture 
+
+See [src/architecture.md](https://github.com/IagoLast/karto/blob/master/src/architecture.md)  for more detailed info.
 
 ## Karto API
 
