@@ -34,3 +34,7 @@ function _generateUrl(config) {
 function _parseCenter(center) {
   return JSON.parse(center);
 }
+
+export default {
+  parse
+};

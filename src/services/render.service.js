@@ -1,10 +1,7 @@
 var map;
 
 export function initMap(options, mapId = 'map') {
-  map = L.map(mapId, {
-    center: options.center,
-    zoom: options.zoom
-  });
+  map = L.map(mapId, options);
 }
 
 export function hide(layer) {

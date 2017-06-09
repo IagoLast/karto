@@ -1,17 +1,3 @@
-import Layer from './classes/Layer.js';
-import * as configService from './services/config.service.js';
-import * as apiService from './services/api.service.js';
-
-// Choose a renderService between the standard (leaflet) or the google-maps-one.
-import renderService from './services/render.service.js'; // Render layers using leaflet.
-// import renderService from './services/render.service.google.js'; // Render layers using google maps
-
-// Layer objects will have renderService and apiService injected.
-// This should be done using a proper DI method, but it´s ok for the demo.
-const INYECTED_DEPENDENCES = {
-  renderService,
-  apiService
-};
 
 /**
  * This is the library main file.
@@ -19,7 +5,11 @@ const INYECTED_DEPENDENCES = {
  * The map is just a list of Layers.
  */
 export default class Karto {
-  constructor() {
+  constructor($injector) {
+    this.$injector = $injector;
+    this.renderService = $injector.renderService;
+    this.configService = $injector.configService;
+    this.Layer = $injector.Layer;
     this.layers = [];
   }
 
@@ -28,13 +18,9 @@ export default class Karto {
    * Once the config is correctly parsed and transformed into a `MapConfig` the layers are stored and drawn.
    */
   loadConfig(config) {
-    this.config = configService.parse(config);
-    renderService.initMap({
-      center: this.config.center,
-      zoom: this.config.zoom,
-    });
-    this.addLayers(this.config.layers)
-      .then(this.drawLayers);
+    this.config = this.configService.parse(config);
+    this.renderService.initMap(this.config);
+    this.addLayers(this.config.layers).then(this.drawLayers);
   }
 
   /**
@@ -58,6 +44,11 @@ export default class Karto {
   addLayer(layerConfig, $index) {
     layerConfig.zIndex = $index;
     layerConfig.apiUrl = this.config.apiUrl;
-    return new Layer(layerConfig, INYECTED_DEPENDENCES).init();
+    return this.createLayer(layerConfig).init();
+  }
+
+  // Create a new layers
+  createLayer(layerConfig) {
+    return new this.Layer(layerConfig, this.$injector);
   }
 }
