@@ -183,6 +183,9 @@ class Layer {
   }
 
   _getTileUrl() {
+    if (this.config.options.urlTemplate) {
+      return Promise.resolve(this.config.options.urlTemplate);
+    }
     return this.apiService.getLayerUrl(this.config);
   }
 }
