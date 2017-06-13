@@ -32,8 +32,11 @@ export default class LayerGroup {
     if (this.view) {
       this.renderService.hide(this);
     }
-    this._updateVisibility();
-    this.view = this.renderService.create(this.url);
+    let url = this._updateUrl();
+    if (url.includes('null')) {
+      return;
+    }
+    this.view = this.renderService.create(url);
     this.renderService.show(this);
   }
 
@@ -42,14 +45,14 @@ export default class LayerGroup {
     return this._getTileUrl();
   }
 
-  _updateVisibility() {
+  _updateUrl() {
     let visibleLayers = [];
     this.layers.forEach((layer, index) => {
       if (layer.visible) {
         visibleLayers.push(index);
       }
     });
-    this.url = this.urlTemplate.replace('{{layers}}', visibleLayers.join(','));
+    return this.urlTemplate.replace('{{layers}}', visibleLayers.join(',') || null);
   }
 
   _getTileUrl() {
