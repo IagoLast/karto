@@ -14,6 +14,7 @@ export default class Layer {
   }
 
   create(url) {
+    this.url = url;
     this.view = this.renderService.create(url);
     return this;
   }

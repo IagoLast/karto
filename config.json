@@ -30,6 +30,13 @@
 				"attribution": "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors"
 			},
 			"type": "tiled"
+		}, {
+			"type": "CartoDB",
+			"options": {
+				"sql": "select * from european_countries_e LIMIT 10",
+				"cartocss": "#european_countries_e{ polygon-fill: #FABADA;\n  polygon-opacity: 0.8;\n  line-color: #FFF;\n  line-width: 1;\n  line-opacity: 0.5;\n }",
+				"cartocss_version": "2.1.1"
+			}
 		}
 	]
 }

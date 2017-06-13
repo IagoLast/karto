@@ -1,4 +1,4 @@
-import Layer from './classes/Layer.js';
+import LayerFactory from './classes/LayerFactory.js';
 import * as configService from './services/config.service.js';
 import * as apiService from './services/api.service.js';
 
@@ -21,6 +21,7 @@ const INYECTED_DEPENDENCES = {
 export default class Karto {
   constructor() {
     this.layers = [];
+    this.factory = new LayerFactory(INYECTED_DEPENDENCES);
   }
 
   /**
@@ -58,6 +59,6 @@ export default class Karto {
   addLayer(layerConfig, $index) {
     layerConfig.zIndex = $index;
     layerConfig.apiUrl = this.config.apiUrl;
-    return new Layer(layerConfig, INYECTED_DEPENDENCES).init();
+    return this.factory.create(layerConfig).init();
   }
 }

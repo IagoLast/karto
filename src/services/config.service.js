@@ -15,15 +15,30 @@ export function parse(config) {
  *  this function fixes some fields to create compatibility.
  */
 function _getLayers(layers) {
-  return layers.map(layer => {
-    if (layer.type === 'CartoDB') {
-      layer.type = 'cartodb';
-    }
-    if (layer.type === 'tiled') {
-      layer.type = 'http';
-    }
-    return layer;
-  });
+  layers = layers.map(_fixLayerType);
+  return _groupLayers(layers);
+}
+
+// Group all cartodb layers into a single one.
+function _groupLayers(layers) {
+  let groupLayer = {
+    type: 'group',
+    subLayers: layers.filter(layer => layer.type === 'cartodb')
+  };
+  let l = layers.filter(layer => layer.type !== 'cartodb');
+  l.push(groupLayer);
+  return l;
+}
+
+// Some values in the layer.type doesnt match the expected by the Mapconfig.
+function _fixLayerType(layer) {
+  if (layer.type === 'CartoDB') {
+    layer.type = 'cartodb';
+  }
+  if (layer.type === 'tiled') {
+    layer.type = 'http';
+  }
+  return layer;
 }
 
 // Use the maps_api_config to build an URL. ie: http://documentation.cartodb.com/api/v1/map
