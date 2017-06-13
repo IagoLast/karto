@@ -44,7 +44,7 @@ Return a list with the current layers on the map.
 **Example**
 
 ```js
-  karto.layers // (3) [Layer, Layer, Layer]
+  karto.layers // (4) [Layer, CartoLayer, Layer, CartoLayer]
 ```
 ## Layer API
 
@@ -66,20 +66,13 @@ Show a layer on the map
   layer.show() // Layer is now visible.
 ```
 
-### layer.setSQL(sql: string)
+## CartoLayer API 
+
+### cartoLayer.setSQL(sql: string)
 Updates the SQL of a cartoDB layer.
 
 **Example**
 
 ```js
   layer.setSQL('select * from european_countries_e LIMIT 3');
-```
-
-### layer.setZIndex(zIndex: number)
-Changes the z-index of a given layer
-
-**Example**
-
-```js
-  layer.setZIndex(2);
 ```

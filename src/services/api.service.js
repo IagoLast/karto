@@ -3,42 +3,28 @@ export function getLayerUrl(layer) {
   return fetch(layer.apiUrl, {
     method: 'POST',
     headers: HEADERS,
-    body: _buildBody(layer),
+    body: _buildBody([layer]),
   })
     .then(data => data.json())
     .then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/0/{z}/{x}/{y}.png`);
 }
 
-export function getGroupLayerUrl(layers) {
-  return fetch(layers.apiUrl, {
+export function getGroupLayerUrl(layers, apiUrl) {
+  return fetch(apiUrl, {
     method: 'POST',
     headers: HEADERS,
-    body: JSON.stringify(
-      {
-        layers: layers.subLayers
-      }
-    ),
+    body: _buildBody(layers),
   })
     .then(data => data.json())
-    .then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/${_buildNumLayers(layers.subLayers.length)}/{z}/{x}/{y}.png`);
+    .then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/{{layers}}/{z}/{x}/{y}.png`);
 }
 
 const HEADERS = new Headers({
   'Content-Type': 'application/json'
 });
 
-function _buildBody(layer) {
+function _buildBody(layers) {
   return JSON.stringify({
-    layers: [layer]
+    layers
   });
-}
-
-// Return a formated layer index froma given length.
-
-function _buildNumLayers(length) {
-  let indexes = [];
-  for (let i = 0; i < length; i++) {
-    indexes.push(i);
-  }
-  return indexes.join(',');
 }

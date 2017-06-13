@@ -1,6 +1,7 @@
 import LayerFactory from './classes/LayerFactory.js';
 import * as configService from './services/config.service.js';
 import * as apiService from './services/api.service.js';
+import LayerGroup from './classes/LayerGroup.js';
 
 // Choose a renderService between the standard (leaflet) or the google-maps-one.
 import renderService from './services/render.service.js'; // Render layers using leaflet.
@@ -21,7 +22,8 @@ const INYECTED_DEPENDENCES = {
 export default class Karto {
   constructor() {
     this.layers = [];
-    this.factory = new LayerFactory(INYECTED_DEPENDENCES);
+    this.layerGroup = new LayerGroup(INYECTED_DEPENDENCES);
+    this.factory = new LayerFactory(INYECTED_DEPENDENCES, this.layerGroup);
   }
 
   /**
@@ -30,35 +32,29 @@ export default class Karto {
    */
   loadConfig(config) {
     this.config = configService.parse(config);
-    renderService.initMap({
-      center: this.config.center,
-      zoom: this.config.zoom,
-    });
-    this.addLayers(this.config.layers)
-      .then(this.drawLayers);
+    renderService.initMap(this.config);
+    this.layerGroup.apiUrl = this.config.apiUrl;
+    this.layers = this.createLayers(this.config.layers);
+    this.initLayers(this.layers).then(this.showLayers);
   }
 
-  /**
-   * Add a layer list to the Karto map.
-   * The `layers` field is a `MapConfig.layers` object. https://carto.com/docs/carto-engine/maps-api/mapconfig
-   */
-  addLayers(layersInfo) {
-    return Promise.all(layersInfo.map(this.addLayer.bind(this)))
-      .then(layers => {
-        this.layers = layers;
-        return layers;
-      });
+  // Create a list of layers
+  createLayers(layersInfo) {
+    return layersInfo.map(this.createLayer.bind(this));
+  }
+
+  createLayer(layerInfo) {
+    layerInfo.apiUrl = this.config.apiUrl;
+    return this.factory.create(layerInfo);
+  }
+
+  initLayers(layers) {
+    return Promise.all(layers.map(layer => layer.init()));
   }
 
   // Show a list of layers
-  drawLayers(layers) {
+  showLayers(layers) {
     layers.forEach(layer => layer.show());
   }
 
-  // Create a new Layer object and add it to the layer list.
-  addLayer(layerConfig, $index) {
-    layerConfig.zIndex = $index;
-    layerConfig.apiUrl = this.config.apiUrl;
-    return this.factory.create(layerConfig).init();
-  }
 }

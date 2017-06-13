@@ -33,16 +33,10 @@ export function create(url) {
   });
 }
 
-export function setZIndex(layer, index) {
-  this.hide(layer);
-  map.overlayMapTypes.insertAt(index, layer.view);
-}
-
 
 export default {
   initMap,
   create,
   hide,
   show,
-  setZIndex,
 };

@@ -7,12 +7,15 @@ export default class Layer {
     this.config = layerConfig;
     this.renderService = renderService;
     this.apiService = apiService;
+    this.visible = false;
   }
 
+  // Get the tile server url
   init() {
     return this._getTileUrl().then(this.create.bind(this));
   }
 
+  // Create a view for this model
   create(url) {
     this.url = url;
     this.view = this.renderService.create(url);
@@ -20,21 +23,13 @@ export default class Layer {
   }
 
   hide() {
+    this.visible = false;
     this.renderService.hide(this);
   }
 
   show() {
+    this.visible = true;
     this.renderService.show(this);
-  }
-
-  setZIndex(index) {
-    this.renderService.setZIndex(this, index);
-  }
-
-  setSQL(sql) {
-    this.config.options.sql = sql;
-    this.hide();
-    return this._getTileUrl().then(this.create.bind(this)).then(this.show.bind(this));
   }
 
   _getTileUrl() {

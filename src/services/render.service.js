@@ -13,15 +13,10 @@ export function hide(layer) {
 
 export function show(layer) {
   layer.view.addTo(map);
-  layer.view.setZIndex(layer.config.zIndex);
 }
 
 export function create(url) {
   return L.tileLayer(url);
-}
-
-export function setZIndex(layer, index) {
-  layer.view.setZIndex(index);
 }
 
 
@@ -30,5 +25,4 @@ export default {
   create,
   hide,
   show,
-  setZIndex,
 };

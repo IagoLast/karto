@@ -15,8 +15,7 @@ export function parse(config) {
  *  this function fixes some fields to create compatibility.
  */
 function _getLayers(layers) {
-  layers = layers.map(_fixLayerType);
-  return _groupLayers(layers);
+  return layers.map(_fixLayerType);
 }
 
 // Group all cartodb layers into a single one.
