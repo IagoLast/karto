@@ -1,6 +1,7 @@
 export default class CartoLayer {
 
   constructor(layerConfig, layerGroup) {
+    this.zIndex = layerConfig.zIndex;
     this.type = layerConfig.type;
     this.options = layerConfig.options;
     this.layerGroup = layerGroup;

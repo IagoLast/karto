@@ -3,6 +3,7 @@ export default class LayerGroup {
     this.layers = [];
     this.renderService = renderService;
     this.apiService = apiService;
+    this.config = {};
     return this;
   }
 
@@ -15,6 +16,7 @@ export default class LayerGroup {
   }
 
   addLayer(layer) {
+    this.config.zIndex = layer.zIndex;
     this.layers.push(layer);
   }
 

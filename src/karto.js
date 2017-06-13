@@ -43,7 +43,8 @@ export default class Karto {
     return layersInfo.map(this.createLayer.bind(this));
   }
 
-  createLayer(layerInfo) {
+  createLayer(layerInfo, index) {
+    layerInfo.zIndex = index;
     layerInfo.apiUrl = this.config.apiUrl;
     return this.factory.create(layerInfo);
   }

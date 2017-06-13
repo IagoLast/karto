@@ -4,6 +4,7 @@ export default class Layer {
    * This way is easier to mock, test and change implementations.
    */
   constructor(layerConfig, {renderService, apiService}) {
+    this.zIndex = layerConfig.zIndex;
     this.config = layerConfig;
     this.renderService = renderService;
     this.apiService = apiService;
