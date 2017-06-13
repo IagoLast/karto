@@ -18,17 +18,6 @@ function _getLayers(layers) {
   return layers.map(_fixLayerType);
 }
 
-// Group all cartodb layers into a single one.
-function _groupLayers(layers) {
-  let groupLayer = {
-    type: 'group',
-    subLayers: layers.filter(layer => layer.type === 'cartodb')
-  };
-  let l = layers.filter(layer => layer.type !== 'cartodb');
-  l.push(groupLayer);
-  return l;
-}
-
 // Some values in the layer.type doesnt match the expected by the Mapconfig.
 function _fixLayerType(layer) {
   if (layer.type === 'CartoDB') {
