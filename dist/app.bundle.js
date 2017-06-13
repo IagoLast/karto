@@ -63,11 +63,131 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 4);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__classes_LayerFactory_js__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_config_service_js__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_api_service_js__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__classes_LayerGroup_js__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__services_render_service_js__ = __webpack_require__(8);
+
+
+
+
+
+// Choose a renderService between the standard (leaflet) or the google-maps-one.
+ // Render layers using leaflet.
+// import renderService from './services/render.service.google.js'; // Render layers using google maps
+
+// Layer objects will have renderService and apiService injected.
+// This should be done using a proper DI method, but it´s ok for the demo.
+const INYECTED_DEPENDENCES = {
+  renderService: __WEBPACK_IMPORTED_MODULE_4__services_render_service_js__["a" /* default */],
+  apiService: __WEBPACK_IMPORTED_MODULE_2__services_api_service_js__
+};
+
+/**
+ * This is the library main file.
+ * This allows to draw a map simply passing a configuraton file.
+ * The map is just a list of Layers.
+ */
+class Karto {
+  constructor() {
+    this.layers = [];
+    this.layerGroup = new __WEBPACK_IMPORTED_MODULE_3__classes_LayerGroup_js__["a" /* default */](INYECTED_DEPENDENCES);
+    this.factory = new __WEBPACK_IMPORTED_MODULE_0__classes_LayerFactory_js__["a" /* default */](INYECTED_DEPENDENCES, this.layerGroup);
+  }
+
+  /**
+   * Create a new map from a json config.
+   * Once the config is correctly parsed and transformed into a `MapConfig` the layers are stored and drawn.
+   */
+  loadConfig(config) {
+    this.config = __WEBPACK_IMPORTED_MODULE_1__services_config_service_js__["a" /* parse */](config);
+    __WEBPACK_IMPORTED_MODULE_4__services_render_service_js__["a" /* default */].initMap(this.config);
+    this.layerGroup.apiUrl = this.config.apiUrl;
+    this.layers = this.createLayers(this.config.layers);
+    this.initLayers(this.layers).then(this.showLayers);
+  }
+
+  // Create a list of layers
+  createLayers(layersInfo) {
+    return layersInfo.map(this.createLayer.bind(this));
+  }
+
+  createLayer(layerInfo) {
+    layerInfo.apiUrl = this.config.apiUrl;
+    return this.factory.create(layerInfo);
+  }
+
+  initLayers(layers) {
+    return Promise.all(layers.map(layer => layer.init()));
+  }
+
+  // Show a list of layers
+  showLayers(layers) {
+    layers.forEach(layer => layer.show());
+  }
+
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Karto;
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class CartoLayer {
+
+  constructor(layerConfig, layerGroup) {
+    this.type = layerConfig.type;
+    this.options = layerConfig.options;
+    this.layerGroup = layerGroup;
+    this.visible = false;
+    layerGroup.addLayer(this);
+  }
+
+  init() {
+    return this.layerGroup.init().then(() => {
+      return this;
+    });
+  }
+
+  hide() {
+    this.visible = false;
+    this.layerGroup.hideLayer(this);
+  }
+
+  show() {
+    this.visible = true;
+    this.layerGroup.showLayer(this);
+  }
+
+  setSQL(sql) {
+    this.options.sql = sql;
+    this.layerGroup.updateUrl().then(() => this.layerGroup.reload());
+  }
+
+  // Prevent circular JSON error when sending data to the server.
+  toJSON() {
+    return {
+      options: this.options,
+      type: this.type
+    };
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = CartoLayer;
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -80,12 +200,15 @@ class Layer {
     this.config = layerConfig;
     this.renderService = renderService;
     this.apiService = apiService;
+    this.visible = false;
   }
 
+  // Get the tile server url
   init() {
     return this._getTileUrl().then(this.create.bind(this));
   }
 
+  // Create a view for this model
   create(url) {
     this.url = url;
     this.view = this.renderService.create(url);
@@ -93,21 +216,13 @@ class Layer {
   }
 
   hide() {
+    this.visible = false;
     this.renderService.hide(this);
   }
 
   show() {
+    this.visible = true;
     this.renderService.show(this);
-  }
-
-  setZIndex(index) {
-    this.renderService.setZIndex(this, index);
-  }
-
-  setSQL(sql) {
-    this.config.options.sql = sql;
-    this.hide();
-    return this._getTileUrl().then(this.create.bind(this)).then(this.show.bind(this));
   }
 
   _getTileUrl() {
@@ -121,165 +236,24 @@ class Layer {
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__classes_LayerFactory_js__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_config_service_js__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__services_api_service_js__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__services_render_service_js__ = __webpack_require__(7);
-
-
-
-
-// Choose a renderService between the standard (leaflet) or the google-maps-one.
- // Render layers using leaflet.
-// import renderService from './services/render.service.google.js'; // Render layers using google maps
-
-// Layer objects will have renderService and apiService injected.
-// This should be done using a proper DI method, but it´s ok for the demo.
-const INYECTED_DEPENDENCES = {
-  renderService: __WEBPACK_IMPORTED_MODULE_3__services_render_service_js__["a" /* default */],
-  apiService: __WEBPACK_IMPORTED_MODULE_2__services_api_service_js__
-};
-
-/**
- * This is the library main file.
- * This allows to draw a map simply passing a configuraton file.
- * The map is just a list of Layers.
- */
-class Karto {
-  constructor() {
-    this.layers = [];
-    this.factory = new __WEBPACK_IMPORTED_MODULE_0__classes_LayerFactory_js__["a" /* default */](INYECTED_DEPENDENCES);
-  }
-
-  /**
-   * Create a new map from a json config.
-   * Once the config is correctly parsed and transformed into a `MapConfig` the layers are stored and drawn.
-   */
-  loadConfig(config) {
-    this.config = __WEBPACK_IMPORTED_MODULE_1__services_config_service_js__["a" /* parse */](config);
-    __WEBPACK_IMPORTED_MODULE_3__services_render_service_js__["a" /* default */].initMap({
-      center: this.config.center,
-      zoom: this.config.zoom
-    });
-    this.addLayers(this.config.layers).then(this.drawLayers);
-  }
-
-  /**
-   * Add a layer list to the Karto map.
-   * The `layers` field is a `MapConfig.layers` object. https://carto.com/docs/carto-engine/maps-api/mapconfig
-   */
-  addLayers(layersInfo) {
-    return Promise.all(layersInfo.map(this.addLayer.bind(this))).then(layers => {
-      this.layers = layers;
-      return layers;
-    });
-  }
-
-  // Show a list of layers
-  drawLayers(layers) {
-    layers.forEach(layer => layer.show());
-  }
-
-  // Create a new Layer object and add it to the layer list.
-  addLayer(layerConfig, $index) {
-    layerConfig.zIndex = $index;
-    layerConfig.apiUrl = this.config.apiUrl;
-    return this.factory.create(layerConfig).init();
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Karto;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Layer_js__ = __webpack_require__(0);
-
-
-class CartoLayer extends __WEBPACK_IMPORTED_MODULE_0__Layer_js__["a" /* default */] {
-  constructor(layerConfig, { renderService, apiService }) {
-    super(layerConfig, {
-      renderService,
-      apiService
-    });
-    this._subLayers = layerConfig.subLayers;
-  }
-
-  hide(index) {
-    this.renderService.hide(this);
-    // Hide the layer with the given index and show the rest
-    if (this._isDefined(index)) {
-      let url = this._createUrl(index, false);
-      this.view = this.renderService.create(url);
-      this.show();
-    }
-  }
-
-  show(index) {
-    console.log(this.url);
-    // Add the layer with the given index to the url
-    if (this._isDefined(index)) {
-      let url = this._createUrl(index, true);
-      this.view = this.renderService.create(url);
-    }
-    this.renderService.show(this);
-  }
-
-  setSQL(sql, index) {
-    if (!this._isDefined(index)) {
-      this.config.subLayers.forEach(subLayer => {
-        subLayer.options.sql = sql;
-      });
-    } else {
-      this.config.subLayers[index].options.sql = sql;
-    }
-    this.hide();
-    return this._getTileUrl().then(this.create.bind(this)).then(this.show.bind(this));
-  }
-
-  _createUrl(index, visible) {
-    throw new Error('Not implemented');
-    // let visibleLayers_ = this.url.split(':0')[1].split('{z}')[0];
-    // let visibleLayers = visibleLayers_.replace(index, '');
-    // visibleLayers = visibleLayers.replace(',,', ',');
-    // let url = this.url.replace(visibleLayers_, visibleLayers);
-  }
-
-  _getTileUrl() {
-    return this.apiService.getGroupLayerUrl(this.config);
-  }
-
-  _isDefined(value) {
-    return value !== undefined && value !== null;
-  }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = CartoLayer;
-
-
-/***/ }),
 /* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Layer_js__ = __webpack_require__(0);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__CartoLayer_js__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Layer_js__ = __webpack_require__(2);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__CartoLayer_js__ = __webpack_require__(1);
 
 
 
 class LayerFactory {
-  constructor($injector) {
+  constructor($injector, layerGroup) {
     this.$injector = $injector;
+    this.layerGroup = layerGroup;
   }
 
   create(layerConfig) {
-    if (layerConfig.type === 'group') {
-      return new __WEBPACK_IMPORTED_MODULE_1__CartoLayer_js__["a" /* default */](layerConfig, this.$injector);
+    if (layerConfig.type === 'cartodb') {
+      return new __WEBPACK_IMPORTED_MODULE_1__CartoLayer_js__["a" /* default */](layerConfig, this.layerGroup);
     }
     return new __WEBPACK_IMPORTED_MODULE_0__Layer_js__["a" /* default */](layerConfig, this.$injector);
   }
@@ -292,8 +266,74 @@ class LayerFactory {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+class LayerGroup {
+  constructor({ renderService, apiService }) {
+    this.layers = [];
+    this.renderService = renderService;
+    this.apiService = apiService;
+    return this;
+  }
+
+  init() {
+    if (!this.initialized) {
+      this.initialized = true;
+      return this._getTileUrl().then(() => this);
+    }
+    return Promise.resolve(this);
+  }
+
+  addLayer(layer) {
+    this.layers.push(layer);
+  }
+
+  hideLayer() {
+    this.reload();
+  }
+
+  showLayer() {
+    this.reload();
+  }
+
+  reload() {
+    if (this.view) {
+      this.renderService.hide(this);
+    }
+    this._updateVisibility();
+    this.view = this.renderService.create(this.url);
+    this.renderService.show(this);
+  }
+
+  // Called when some layer has changed its config
+  updateUrl() {
+    return this._getTileUrl();
+  }
+
+  _updateVisibility() {
+    let visibleLayers = [];
+    this.layers.forEach((layer, index) => {
+      if (layer.visible) {
+        visibleLayers.push(index);
+      }
+    });
+    this.url = this.urlTemplate.replace('{{layers}}', visibleLayers.join(','));
+  }
+
+  _getTileUrl() {
+    return this.apiService.getGroupLayerUrl(this.layers, this.apiUrl).then(urlTemplate => {
+      this.urlTemplate = urlTemplate;
+    });
+  }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LayerGroup;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__karto_js__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__karto_js__ = __webpack_require__(0);
 
 
 // Download config from server and start the app.
@@ -310,7 +350,7 @@ function initApp(config) {
 }
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -322,42 +362,30 @@ function getLayerUrl(layer) {
   return fetch(layer.apiUrl, {
     method: 'POST',
     headers: HEADERS,
-    body: _buildBody(layer)
+    body: _buildBody([layer])
   }).then(data => data.json()).then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/0/{z}/{x}/{y}.png`);
 }
 
-function getGroupLayerUrl(layers) {
-  return fetch(layers.apiUrl, {
+function getGroupLayerUrl(layers, apiUrl) {
+  return fetch(apiUrl, {
     method: 'POST',
     headers: HEADERS,
-    body: JSON.stringify({
-      layers: layers.subLayers
-    })
-  }).then(data => data.json()).then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/${_buildNumLayers(layers.subLayers.length)}/{z}/{x}/{y}.png`);
+    body: _buildBody(layers)
+  }).then(data => data.json()).then(data => `https://ashbu.cartocdn.com/documentation/api/v1/map/${data.layergroupid}/{{layers}}/{z}/{x}/{y}.png`);
 }
 
 const HEADERS = new Headers({
   'Content-Type': 'application/json'
 });
 
-function _buildBody(layer) {
+function _buildBody(layers) {
   return JSON.stringify({
-    layers: [layer]
+    layers
   });
 }
 
-// Return a formated layer index froma given length.
-
-function _buildNumLayers(length) {
-  let indexes = [];
-  for (let i = 0; i < length; i++) {
-    indexes.push(i);
-  }
-  return indexes.join(',');
-}
-
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -379,8 +407,7 @@ function parse(config) {
  *  this function fixes some fields to create compatibility.
  */
 function _getLayers(layers) {
-  layers = layers.map(_fixLayerType);
-  return _groupLayers(layers);
+  return layers.map(_fixLayerType);
 }
 
 // Group all cartodb layers into a single one.
@@ -415,7 +442,7 @@ function _parseCenter(center) {
 }
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -423,7 +450,6 @@ function _parseCenter(center) {
 /* unused harmony export hide */
 /* unused harmony export show */
 /* unused harmony export create */
-/* unused harmony export setZIndex */
 var map;
 
 function initMap(options, mapId = 'map') {
@@ -439,23 +465,17 @@ function hide(layer) {
 
 function show(layer) {
   layer.view.addTo(map);
-  layer.view.setZIndex(layer.config.zIndex);
 }
 
 function create(url) {
   return L.tileLayer(url);
 }
 
-function setZIndex(layer, index) {
-  layer.view.setZIndex(index);
-}
-
 /* harmony default export */ __webpack_exports__["a"] = ({
   initMap,
   create,
   hide,
-  show,
-  setZIndex
+  show
 });
 
 /***/ })
