@@ -121,7 +121,8 @@ class Karto {
     return layersInfo.map(this.createLayer.bind(this));
   }
 
-  createLayer(layerInfo) {
+  createLayer(layerInfo, index) {
+    layerInfo.zIndex = index;
     layerInfo.apiUrl = this.config.apiUrl;
     return this.factory.create(layerInfo);
   }
@@ -147,6 +148,7 @@ class Karto {
 class CartoLayer {
 
   constructor(layerConfig, layerGroup) {
+    this.zIndex = layerConfig.zIndex;
     this.type = layerConfig.type;
     this.options = layerConfig.options;
     this.layerGroup = layerGroup;
@@ -197,6 +199,7 @@ class Layer {
    * This way is easier to mock, test and change implementations.
    */
   constructor(layerConfig, { renderService, apiService }) {
+    this.zIndex = layerConfig.zIndex;
     this.config = layerConfig;
     this.renderService = renderService;
     this.apiService = apiService;
@@ -271,6 +274,7 @@ class LayerGroup {
     this.layers = [];
     this.renderService = renderService;
     this.apiService = apiService;
+    this.config = {};
     return this;
   }
 
@@ -283,6 +287,7 @@ class LayerGroup {
   }
 
   addLayer(layer) {
+    this.config.zIndex = layer.zIndex;
     this.layers.push(layer);
   }
 
